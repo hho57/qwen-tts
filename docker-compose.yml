@@ -4,10 +4,11 @@ services:
   qwen-tts:
     build: .
     container_name: qwen-tts-lab
-    shm_size: 8gb
+    shm_size: 12gb # On augmente un peu pour l'APU (mémoire partagée)
     environment:
-      - HSA_OVERRIDE_GFX_VERSION=11.0.0
+      - HSA_OVERRIDE_GFX_VERSION=11.5.0 # Note le .5.0 pour coller au gfx1150
       - TRANSFORMERS_CACHE=/app/cache
+      - HSA_ENABLE_SDMA=0 # Souvent nécessaire pour stabiliser les APU sur ROCm
     ports:
       - "48000:48000"
     volumes:
@@ -15,12 +16,14 @@ services:
     devices:
       - "/dev/kfd:/dev/kfd"
       - "/dev/dri:/dev/dri"
+      - "/dev/dri/renderD128:/dev/dri/renderD128" # Accès direct au rendu
     group_add:
       - video
       - render
     cap_add:
       - SYS_ADMIN
       - SYS_PTRACE
-      
+
 volumes:
-  qwen_cache:
+  qwen_cache:  
+
