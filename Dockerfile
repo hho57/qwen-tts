@@ -1,24 +1,20 @@
-#FROM rocm/pytorch:rocm6.0_ubuntu22.04_py3.10_pytorch_2.1.2
-FROM rocm/pytorch:rocm7.2_ubuntu22.04_py3.10_pytorch_release_2.9.1
+FROM rocm/pytorch:latest-release
 
-ENV TRANSFORMERS_CACHE=/app/cache
-ENV HSA_OVERRIDE_GFX_VERSION=11.0.0
+# On définit les variables pour l'APU au niveau système
+ENV HSA_OVERRIDE_GFX_VERSION=11.5.0
+ENV ROCM_PATH=/opt/rocm
+ENV PATH="$ROCM_PATH/bin:$ROCM_PATH/opencl/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
-ENV GPU_MAX_ALLOC_PERCENT=100
-ENV GPU_MAX_HEAP_SIZE=100
-ENV TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1
 
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y ffmpeg git libsndfile1 && rm -rf /var/lib/apt/lists/*
 
-# Force l'installation de la version de dev pour supporter qwen3_tts
+# Force la réinstallation des libs et de transformers (support qwen3_tts)
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir flask accelerate librosa soundfile einops sentencepiece && \
     pip install --no-cache-dir --force-reinstall git+https://github.com/huggingface/transformers.git
 
 COPY app/ /app/
 
-# On s'assure que le port correspond à ton compose
 CMD ["python", "/app/app.py"]
-
