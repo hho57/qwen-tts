@@ -1,38 +1,36 @@
 import torch
-import io
-import soundfile as sf
+import os
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from flask import Flask, request, send_file
-from transformers import  AutoModel, AutoTokenizer
+import soundfile as sf
+import io
 
 app = Flask(__name__)
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+# Diagnostic GPU
+print(f"HSA_OVERRIDE_GFX_VERSION: {os.getenv('HSA_OVERRIDE_GFX_VERSION')}")
+cuda_available = torch.cuda.is_available()
+device = "cuda" if cuda_available else "cpu"
+print(f"Cuda (ROCm) disponible: {cuda_available}")
+if cuda_available:
+    print(f"Device nom: {torch.cuda.get_device_name(0)}")
+
 model_id = "Qwen/Qwen3-TTS-12Hz-0.6B-Base"
-#model_id = "Qwen/Qwen3-TTS-12Hz-0.6B-Base"
 
-print(f"Chargement du modèle sur {device} (gfx1150)...")
-
-# 1. Charger la config en autorisant le code distant
-#config = AutoConfig.from_pretrained(model_id, trust_remote_code=True)
+print(f"Chargement de {model_id} sur {device}...")
 
 try:
-    print("Tentative de chargement du tokenizer...")
     tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
-    
-    print("Tentative de chargement du modèle (ceci peut prendre du temps)...")
-    # On évite AutoConfig et on laisse AutoModel tout gérer avec trust_remote_code
-    model = AutoModel.from_pretrained(
+    # On utilise AutoModelForCausalLM car Qwen3-TTS est basé sur un backbone LLM
+    model = AutoModelForCausalLM.from_pretrained(
         model_id,
         trust_remote_code=True,
-        torch_dtype=torch.float16,
-        low_cpu_mem_usage=True
-    ).to(device)
-    print("Modèle chargé avec succès !")
+        torch_dtype=torch.float16 if cuda_available else torch.float32,
+        device_map="auto" if cuda_available else None
+    )
+    print("Succès : Modèle chargé !")
 except Exception as e:
-    print(f"Erreur lors du chargement : {e}")
-    # Plan B : Si AutoModel échoue encore, on affiche les fichiers du repo pour debug
-    import os
-    print(f"Fichiers dans le cache : {os.listdir(os.environ.get('TRANSFORMERS_CACHE', '.'))}")
+    print(f"ERREUR FATALE : {e}")
 
 @app.route('/generate', methods=['POST'])
 def generate():
