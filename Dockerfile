@@ -1,4 +1,4 @@
-FROM rocm/pytorch:latest-release
+FROM rocm/pytorch
 
 # On définit les variables pour l'APU au niveau système
 ENV HSA_OVERRIDE_GFX_VERSION=11.5.0
@@ -18,3 +18,4 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY app/ /app/
 
 CMD ["python", "/app/app.py"]
+
