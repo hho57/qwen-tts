@@ -18,6 +18,9 @@ services:
     group_add:
       - video
       - render
-
+    cap_add:
+      - SYS_ADMIN
+      - SYS_PTRACE
+      
 volumes:
   qwen_cache:
