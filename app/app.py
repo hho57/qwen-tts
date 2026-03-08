@@ -2,7 +2,7 @@ import torch
 import io
 import soundfile as sf
 from flask import Flask, request, send_file
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoConfig, AutoModel, AutoTokenizer
 
 app = Flask(__name__)
 
@@ -11,9 +11,13 @@ model_id = "Qwen/Qwen3-TTS-12Hz-0.6B-Base"
 
 print(f"Chargement du modèle sur {device} (gfx1150)...")
 
+# 1. Charger la config en autorisant le code distant
+config = AutoConfig.from_pretrained(model_id, trust_remote_code=True)
+
 tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
 model = AutoModel.from_pretrained(
     model_id,
+    config=config,
     torch_dtype=torch.float16,
     trust_remote_code=True
 ).to(device)
