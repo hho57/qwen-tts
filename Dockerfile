@@ -4,6 +4,9 @@ FROM rocm/pytorch:rocm7.2_ubuntu22.04_py3.10_pytorch_release_2.9.1
 ENV TRANSFORMERS_CACHE=/app/cache
 ENV HSA_OVERRIDE_GFX_VERSION=11.0.0
 ENV PYTHONUNBUFFERED=1
+ENV GPU_MAX_ALLOC_PERCENT=100
+ENV GPU_MAX_HEAP_SIZE=100
+ENV TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1
 
 WORKDIR /app
 
@@ -18,3 +21,4 @@ COPY app/ /app/
 
 # On s'assure que le port correspond à ton compose
 CMD ["python", "/app/app.py"]
+
