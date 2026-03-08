@@ -4,7 +4,7 @@ services:
   qwen-tts:
     build: .
     container_name: qwen-tts-lab
-    shm_size: 12gb # On augmente un peu pour l'APU (mémoire partagée)
+    shm_size: 8gb # On augmente un peu pour l'APU (mémoire partagée)
     environment:
       - HSA_OVERRIDE_GFX_VERSION=11.5.0 # Note le .5.0 pour coller au gfx1150
       - TRANSFORMERS_CACHE=/app/cache
@@ -26,4 +26,5 @@ services:
 
 volumes:
   qwen_cache:  
+
 
