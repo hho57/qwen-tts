@@ -7,15 +7,14 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Installation des dépendances système pour l'audio
-RUN apt-get update && apt-get install -y ffmpeg git && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ffmpeg git libsndfile1 && rm -rf /var/lib/apt/lists/*
 
-# On force la réinstallation de transformers depuis la source
-RUN pip install --no-cache-dir flask accelerate librosa soundfile einops sentencepiece
-RUN pip install --no-cache-dir --upgrade git+https://github.com/huggingface/transformers.git
+# Force l'installation de la version de dev pour supporter qwen3_tts
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir flask accelerate librosa soundfile einops sentencepiece && \
+    pip install --no-cache-dir --force-reinstall git+https://github.com/huggingface/transformers.git
 
 COPY app/ /app/
 
+# On s'assure que le port correspond à ton compose
 CMD ["python", "/app/app.py"]
-
-
