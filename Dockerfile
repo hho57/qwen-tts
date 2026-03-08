@@ -1,4 +1,5 @@
-FROM rocm/pytorch:rocm6.0_ubuntu22.04_py3.10_pytorch_2.1.2
+#FROM rocm/pytorch:rocm6.0_ubuntu22.04_py3.10_pytorch_2.1.2
+FROM rocm/pytorch:latest-release
 
 ENV TRANSFORMERS_CACHE=/app/cache
 ENV HSA_OVERRIDE_GFX_VERSION=11.0.0
@@ -13,5 +14,6 @@ RUN pip install --no-cache-dir \
     accelerate \
     librosa \
     soundfile
+
 
 CMD ["python", "/app/app.py"]
